@@ -1,13 +1,17 @@
 package gotdd
 
-import "errors"
+import (
+	"errors"
+	"sync"
+)
 
 type Review struct {
 	Comment string
 }
 
 type Register struct {
-	lts []LunchTalk
+	lts   []LunchTalk
+	mutex sync.Mutex
 }
 
 type LunchTalk struct {
@@ -17,6 +21,9 @@ type LunchTalk struct {
 }
 
 func (r *Register) AddLunchTalk(lt LunchTalk) error {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
 	if len(lt.Title) == 0 || len(lt.Speaker) == 0 {
 		return errors.New("Missing Data")
 	}
@@ -25,10 +32,14 @@ func (r *Register) AddLunchTalk(lt LunchTalk) error {
 }
 
 func (r *Register) GetLunchTalks() []LunchTalk {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
 	return r.lts
 }
 
 func (r *Register) AddReview(i int, rev Review) error {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
 	if len(rev.Comment) == 0 {
 		return errors.New("Missing Data")
 	}
@@ -40,6 +51,8 @@ func (r *Register) AddReview(i int, rev Review) error {
 }
 
 func (r *Register) AdjustReview(i int, j int, rev Review) error {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
 	if len(rev.Comment) == 0 {
 		return errors.New("Missing Data")
 	}

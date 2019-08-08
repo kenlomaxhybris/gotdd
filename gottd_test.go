@@ -2,7 +2,9 @@ package gotdd
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 )
 
 func Example() {
@@ -78,7 +80,23 @@ func Benchmark(b *testing.B) {
 	r := Register{}
 	for i := 0; i < b.N; i++ {
 		r.AddLunchTalk(LunchTalk{Title: "Tdd with Go", Speaker: "Ken Lomax"})
-		r.AddReview(0, Review{Comment: "Pile of poo"})
-		r.AdjustReview(0, 0, Review{Comment: "Pile of poo"})
+		r.AddReview(rand.Intn(100), Review{Comment: "Pile of poo"})
+		r.AdjustReview(rand.Intn(100), rand.Intn(100), Review{Comment: "Pile of poo"})
 	}
+}
+
+func TestMultipleCalls(t *testing.T) {
+	r := Register{}
+	n := 100
+	for i := 0; i < n; i++ {
+		go r.AddLunchTalk(LunchTalk{Title: "Tdd with Go", Speaker: "Ken Lomax"})
+	}
+	for i := 0; i < n; i++ {
+		go r.AddReview(rand.Intn(100), Review{Comment: "Pile of poo"})
+	}
+	for i := 0; i < n; i++ {
+		go r.AdjustReview(rand.Intn(100), rand.Intn(100), Review{Comment: "Pile of poo"})
+	}
+	time.Sleep(time.Second * 2)
+
 }
